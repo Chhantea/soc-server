@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Hello world</title>
+</head>
+
+<script src = "/socket.io/socket.io.js"></script>
+<script>
+    var socket = io();
+    function setUsername() {
+        socket.emit('setUsername', document.getElementById('name').value);
+    };
+
+    var user;
+    socket.on('userExists', function(data) {
+        document.getElementById('error-container').innerHTML = data;
+    });
+    socket.on('userSet', function(data) {
+        user = data.username;
+        document.body.innerHTML = '<input type = "text" id = "message">\
+         <button type = "button" name = "button" onclick = "sendMessage()">Send</button>\
+         <div id = "message-container"></div>';
+    });
+    function sendMessage() {
+        var msg = document.getElementById('message').value;
+        if(msg) {
+            var j_data={
+                author: 'them',
+                type: 'text',
+                data: {
+                    text: msg
+                }
+            };
+            socket.emit('msg', j_data);
+        }
+    }
+    socket.on('newmsg', function(data) {
+        console.log(data)
+        if(user) {
+            document.getElementById('message-container').innerHTML += '<div><b> </b>: ' + data.data.text + '</div>'
+        }
+    })
+    socket.on('userDc',function(data) {
+        document.getElementById('noti').innerHTML = '<h1>'+data+'</h1>'
+    });
+    socket.on('connect_failed', function() {
+        document.write("Sorry, there seems to be an issue with the connection!");
+    })
+    socket.on('getupdate',function () {
+        document.write("Sorry, theres new connection");
+
+    })
+
+</script>
+
+<body>
+<div id = "error-container"></div>
+<div id = "noti"></div>
+<input id = "name" type = "text" name = "name" value = ""
+       placeholder = "Enter your name!">
+<button type = "button" name = "button" onclick = "setUsername()">
+  Let me chat!
+</button>
+<a href="/viewer">View</a>
+<a href="/stream">stream</a>
+</body>
+</html>
